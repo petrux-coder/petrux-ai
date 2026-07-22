@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-import json
+import time
 
 st.set_page_config(page_title="PETRUX AI", page_icon="🤖", layout="centered")
 
@@ -39,15 +39,12 @@ with st.sidebar:
     st.markdown("🎯 Mission: Africa's AI Future")
     st.markdown("---")
     st.markdown("### ✨ Features")
-    st.markdown("✅ Like DeepSeek - Smart & Fast")
-    st.markdown("✅ Powered by Hugging Face")
+    st.markdown("✅ Smart Conversations")
+    st.markdown("✅ Fast Responses")
     st.markdown("✅ 100% Free")
-    st.markdown("---")
-    st.markdown("### 🔑 API Info")
-    st.markdown("Using Hugging Face Inference API")
 
-# --- YOUR HUGGING FACE TOKEN (INSERTED) ---
-API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium"
+# --- Using a simpler, more reliable model ---
+API_URL = "https://api-inference.huggingface.co/models/gpt2"
 headers = {"Authorization": "Bearer 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"}
 
 if "messages" not in st.session_state:
@@ -67,21 +64,24 @@ if prompt := st.chat_input("Ask PETRU anything..."):
     with st.chat_message("assistant"):
         with st.spinner("PETRU is thinking..."):
             try:
-                conversation = "\n".join([f"{msg['role']}: {msg['content']}" for msg in st.session_state.messages[-5:]])
+                # Simpler prompt format
+                full_prompt = f"You are PETRU, a helpful AI assistant. User: {prompt}\nPETRU:"
+                
                 payload = {
-                    "inputs": f"{conversation}\nassistant:",
+                    "inputs": full_prompt,
                     "parameters": {
-                        "max_new_tokens": 150,
+                        "max_new_tokens": 100,
                         "temperature": 0.7,
-                        "do_sample": True
+                        "do_sample": True,
+                        "return_full_text": False
                     }
                 }
                 
-                response = requests.post(API_URL, headers=headers, json=payload)
+                response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
                 
                 if response.status_code == 200:
                     result = response.json()
-                    petru_reply = result[0]['generated_text'].split("assistant:")[-1].strip()
+                    petru_reply = result[0]['generated_text'].strip()
                     
                     if not petru_reply:
                         petru_reply = "I'm PETRU on PETRUX OS. How can I help?"
@@ -91,6 +91,10 @@ if prompt := st.chat_input("Ask PETRU anything..."):
                 else:
                     st.error(f"API Error: {response.status_code}")
                     
+            except requests.exceptions.Timeout:
+                st.error("⏰ PETRU is taking too long. Please try again.")
+            except requests.exceptions.ConnectionError:
+                st.error("🌐 Connection error. Please refresh and try again.")
             except Exception as e:
                 st.error(f"Error: {e}")
 
