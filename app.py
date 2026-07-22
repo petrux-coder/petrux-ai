@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 import json
-import os
 
 st.set_page_config(page_title="PETRUX AI", page_icon="🤖", layout="centered")
 
@@ -44,34 +43,52 @@ with st.sidebar:
     st.markdown("✅ Smart Responses")
     st.markdown("✅ 100% Free")
 
-# Get token from Streamlit Secrets (SAFE!)
+# Get token from Streamlit Secrets
 HF_TOKEN = st.secrets.get("HF_TOKEN")
 
 if not HF_TOKEN:
     st.error("⚠️ API token not configured. Please contact the app administrator.")
     st.stop()
 
-API_URL = "https://api-inference.huggingface.co/models/microsoft/Phi-3-mini-4k-instruct"
-headers = {"Authorization": f"Bearer {HF_TOKEN}"}
+# Use a simpler, more reliable model
+API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium"
 
-def get_petru_response(messages):
+def get_petru_response(user_input, chat_history):
     try:
-        formatted_messages = [
-            {"role": "system", "content": "You are PETRU, a helpful AI assistant on PETRUX OS. Give clear, accurate answers."}
-        ] + messages
+        # Build conversation history
+        conversation = "\n".join(chat_history[-4:])
         
         payload = {
-            "messages": formatted_messages,
-            "max_new_tokens": 200,
-            "temperature": 0.7
+            "inputs": f"{conversation}\nUser: {user_input}\nPETRU:",
+            "parameters": {
+                "max_new_tokens": 80,
+                "temperature": 0.7,
+                "do_sample": True,
+                "pad_token_id": 50256,
+                "repetition_penalty": 1.1
+            }
         }
         
-        response = requests.post(API_URL, headers=headers, json=payload)
+        headers = {
+            "Authorization": f"Bearer {HF_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
         
         if response.status_code == 200:
-            return response.json()['choices'][0]['message']['content']
+            result = response.json()
+            if isinstance(result, list) and len(result) > 0:
+                generated_text = result[0].get('generated_text', '')
+                reply = generated_text.split("PETRU:")[-1].strip()
+                return reply if reply else "I'm PETRU on PETRUX OS. How can I help?"
+            else:
+                return "I'm PETRU on PETRUX OS. How can I help?"
         else:
-            return "I'm having trouble connecting. Please try again."
+            return f"I'm having trouble connecting. Please try again."
+            
+    except requests.exceptions.Timeout:
+        return "The request timed out. Please try again."
     except Exception as e:
         return "I'm having trouble connecting. Please try again."
 
@@ -79,6 +96,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "assistant", "content": "Hello! I'm PETRU on PETRUX OS. How can I help you today?"}
     ]
+    st.session_state.chat_history = []
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
@@ -89,11 +107,15 @@ if prompt := st.chat_input("Ask PETRU anything..."):
     with st.chat_message("user"):
         st.markdown(prompt)
     
+    # Add to chat history
+    st.session_state.chat_history.append(f"User: {prompt}")
+    
     with st.chat_message("assistant"):
         with st.spinner("PETRU is thinking..."):
-            petru_reply = get_petru_response(st.session_state.messages)
+            petru_reply = get_petru_response(prompt, st.session_state.chat_history)
             st.markdown(petru_reply)
             st.session_state.messages.append({"role": "assistant", "content": petru_reply})
+            st.session_state.chat_history.append(f"PETRU: {petru_reply}")
 
 st.markdown("---")
 st.markdown('<div class="footer">© 2026 PETRUX AI • Built by Peter Eniola Ayanniyi</div>', unsafe_allow_html=True)
