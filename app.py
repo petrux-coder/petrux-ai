@@ -1,7 +1,7 @@
 import streamlit as st
-from transformers import pipeline
-import warnings
-warnings.filterwarnings('ignore')
+import requests
+import json
+import os
 
 st.set_page_config(page_title="PETRUX AI", page_icon="🤖", layout="centered")
 
@@ -41,19 +41,39 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### ✨ Features")
     st.markdown("✅ Intelligent Conversations")
-    st.markdown("✅ Fast Responses")
+    st.markdown("✅ Smart Responses")
     st.markdown("✅ 100% Free")
 
-@st.cache_resource
-def load_model():
-    # Using a MUCH smaller and faster model
-    return pipeline('text-generation', model='distilgpt2', device=-1)
+# Get token from Streamlit Secrets (SAFE!)
+HF_TOKEN = st.secrets.get("HF_TOKEN")
 
-try:
-    generator = load_model()
-    model_loaded = True
-except:
-    model_loaded = False
+if not HF_TOKEN:
+    st.error("⚠️ API token not configured. Please contact the app administrator.")
+    st.stop()
+
+API_URL = "https://api-inference.huggingface.co/models/microsoft/Phi-3-mini-4k-instruct"
+headers = {"Authorization": f"Bearer {HF_TOKEN}"}
+
+def get_petru_response(messages):
+    try:
+        formatted_messages = [
+            {"role": "system", "content": "You are PETRU, a helpful AI assistant on PETRUX OS. Give clear, accurate answers."}
+        ] + messages
+        
+        payload = {
+            "messages": formatted_messages,
+            "max_new_tokens": 200,
+            "temperature": 0.7
+        }
+        
+        response = requests.post(API_URL, headers=headers, json=payload)
+        
+        if response.status_code == 200:
+            return response.json()['choices'][0]['message']['content']
+        else:
+            return "I'm having trouble connecting. Please try again."
+    except Exception as e:
+        return "I'm having trouble connecting. Please try again."
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
@@ -69,30 +89,11 @@ if prompt := st.chat_input("Ask PETRU anything..."):
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    if model_loaded:
-        with st.chat_message("assistant"):
-            with st.spinner("PETRU is thinking..."):
-                try:
-                    response = generator(
-                        f"You are PETRU, a helpful AI assistant. Answer briefly: {prompt}\nPETRU:",
-                        max_new_tokens=60,
-                        do_sample=True,
-                        temperature=0.7,
-                        pad_token_id=50256
-                    )
-                    
-                    petru_reply = response[0]['generated_text'].split("PETRU:")[-1].strip()
-                    
-                    if not petru_reply:
-                        petru_reply = "I'm PETRU on PETRUX OS. How can I help?"
-                    
-                    st.markdown(petru_reply)
-                    st.session_state.messages.append({"role": "assistant", "content": petru_reply})
-                    
-                except Exception as e:
-                    st.error(f"Error: {e}")
-    else:
-        st.error("PETRU is not ready. Please try again later.")
+    with st.chat_message("assistant"):
+        with st.spinner("PETRU is thinking..."):
+            petru_reply = get_petru_response(st.session_state.messages)
+            st.markdown(petru_reply)
+            st.session_state.messages.append({"role": "assistant", "content": petru_reply})
 
 st.markdown("---")
 st.markdown('<div class="footer">© 2026 PETRUX AI • Built by Peter Eniola Ayanniyi</div>', unsafe_allow_html=True)
