@@ -38,45 +38,95 @@ with st.sidebar:
     st.markdown("🎯 Mission: Africa's AI Future")
     st.markdown("---")
     st.markdown("### 📊 Status")
-    st.markdown("✅ **AI Engine:** PETRU v1.0")
-    st.markdown("✅ **Status:** Online")
+    st.markdown("✅ **AI Engine:** PETRU v2.0")
+    st.markdown("✅ **Status:** Online & Smart")
     st.markdown("✅ **Free to use**")
+    st.markdown("---")
+    st.markdown("### 💡 Tips")
+    st.markdown("Ask me about:")
+    st.markdown("• Nigeria 🇳🇬")
+    st.markdown("• Africa 🌍")
+    st.markdown("• Math ➕")
+    st.markdown("• History 📚")
 
-# --- PETRU's Responses (Self-Contained) ---
+# --- PETRU's RESPONSES (EXPANDED) ---
 def get_petru_response(prompt):
     prompt_lower = prompt.lower()
     
-    # --- PRE-PROGRAMMED RESPONSES ---
-    responses = {
-        "hello": "Hello! I'm PETRU, your AI assistant on PETRUX OS. How can I help you today?",
-        "hi": "Hi there! I'm PETRU on PETRUX OS. What can I do for you?",
-        "who built you": "I was built by Peter Eniola Ayanniyi, a young Nigerian innovator! He created PETRUX AI to bring intelligent assistance to Africa and the world.",
-        "what can you do": "I can answer questions, help with creative tasks, and assist with problem-solving. Ask me anything!",
-        "capital of nigeria": "The capital of Nigeria is Abuja. It became the capital in 1991, replacing Lagos.",
-        "nigeria": "Nigeria is a beautiful country in West Africa. It's home to over 200 million people, with over 250 ethnic groups!",
-        "age": "I don't have an age, but I was created by Peter Eniola Ayanniyi in 2026.",
-        "joke": "Why do programmers prefer dark mode? Because light attracts bugs! 😄",
-        "how are you": "I'm doing great, thanks for asking! I'm always happy to chat with you.",
-        "your name": "I'm PETRU, your AI assistant on PETRUX OS!",
-        "thank you": "You're welcome! I'm always here to help.",
-        "africa": "Africa is a amazing continent! I'm proud to be built in Africa by Peter Eniola Ayanniyi.",
-        "build": "I was built by Peter Eniola Ayanniyi using Python and AI technology.",
-        "2+2": "2 + 2 equals 4. That's basic math!",
-        "what is": "I can help with many questions! What would you like to know?",
-    }
+    # --- GREETINGS ---
+    if any(word in prompt_lower for word in ["hello", "hi", "hey", "good morning", "good afternoon"]):
+        return "Hello! I'm PETRU on PETRUX OS. How can I help you today?"
     
-    # Check for matching keywords
-    for key in responses:
-        if key in prompt_lower:
-            return responses[key]
+    # --- ABOUT PETRU ---
+    if any(word in prompt_lower for word in ["who built you", "your creator", "who made you"]):
+        return "I was built by Peter Eniola Ayanniyi, a young Nigerian innovator! He created PETRUX AI to bring intelligent assistance to Africa and the world."
     
-    # --- FALLBACK: Generate a response using patterns ---
-    if "?" in prompt:
-        return "That's a great question! I'm still learning, but I'd love to help you find the answer."
-    elif "help" in prompt_lower:
-        return "I'm here to help! Ask me about anything, and I'll do my best to assist you."
+    if any(word in prompt_lower for word in ["your name", "who are you"]):
+        return "I'm PETRU, your AI assistant running on PETRUX OS! I was built to help you learn and grow."
+    
+    # --- NIGERIA ---
+    if "capital of nigeria" in prompt_lower:
+        return "The capital of Nigeria is Abuja. It became the capital in 1991, replacing Lagos."
+    
+    if "nigeria" in prompt_lower and "history" in prompt_lower:
+        return "Nigeria's history is rich and complex! It became independent from Britain in 1960. Before that, it was home to ancient kingdoms like the Nri, Oyo, and Benin empires. Today, Nigeria is Africa's most populous country with over 200 million people!"
+    
+    if "nigeria" in prompt_lower and ("ethnic" in prompt_lower or "group" in prompt_lower):
+        return "Nigeria has over 250 ethnic groups! The three largest are Hausa, Igbo, and Yoruba. Each has its own unique language, culture, and traditions."
+    
+    if "nigeria" in prompt_lower:
+        return "Nigeria is a beautiful country in West Africa. It's home to over 200 million people, over 250 ethnic groups, and is known as 'The Giant of Africa'. The country has a rich history, diverse cultures, and is a leader in music, film, and technology on the continent!"
+    
+    # --- AFRICA ---
+    if "africa" in prompt_lower:
+        return "Africa is an amazing continent! It's home to 54 countries, over 1.4 billion people, and is the birthplace of humanity. I'm proud to be built in Africa by Peter Eniola Ayanniyi!"
+    
+    # --- CONTINENTS ---
+    if "continent" in prompt_lower:
+        return "There are 7 continents in the world: Africa, Antarctica, Asia, Europe, North America, Australia/Oceania, and South America. Africa is the second largest!"
+    
+    # --- MATH ---
+    if any(word in prompt_lower for word in ["math", "add", "subtract", "multiply", "divide"]):
+        return "I can help with basic math! Just ask me something like: What is 5 + 5? or 10 x 5?"
+    
+    if "+" in prompt_lower or "-" in prompt_lower or "x" in prompt_lower or "/" in prompt_lower:
+        try:
+            # Simple math calculation
+            result = eval(prompt_lower.replace("x", "*").replace("is", "").strip())
+            return f"The answer is {result}! Let me know if you need more math help."
+        except:
+            return "I can do basic math! Try something like: 5 + 5 or 10 x 5."
+    
+    # --- JOKES ---
+    if "joke" in prompt_lower:
+        jokes = [
+            "Why do programmers prefer dark mode? Because light attracts bugs! 😄",
+            "What do you call a Nigerian programmer? A Nairobian! 😂",
+            "Why did the AI break up with the human? It needed more processing power! 🤖",
+            "What's a programmer's favorite song? 'Hello World' by Adele! 🎵"
+        ]
+        return random.choice(jokes)
+    
+    # --- FACTS ---
+    if "fact" in prompt_lower:
+        facts = [
+            "Nigeria has the largest economy in Africa! 💰",
+            "The first African country to gain independence was Ghana in 1957.",
+            "Africa is the continent with the most countries (54)!",
+            "The world's oldest university is in Africa - University of Timbuktu (1120 AD)!",
+            "Nigeria produces the most movies in Africa - Nollywood! 🎬"
+        ]
+        return random.choice(facts)
+    
+    # --- HELP ---
+    if "help" in prompt_lower or "what can you do" in prompt_lower:
+        return "I can answer questions about Nigeria, Africa, history, math, and more! Just ask me anything. Try: 'Tell me about Nigeria' or 'What is 5 + 5?'"
+    
+    # --- FALLBACK (For any other question) ---
+    if "?" in prompt_lower:
+        return f"That's a great question! I'm still learning, but I'd love to help. Could you ask me about Nigeria, Africa, math, or history?"
     else:
-        return f"Thanks for asking about '{prompt}'. I'm PETRU on PETRUX OS, and I'm here to learn and grow with you!"
+        return f"Thanks for your message! I'm PETRU on PETRUX OS. Try asking me: 'Tell me about Nigeria' or 'What is 5 + 5?'"
 
 # --- Chat Interface ---
 if "messages" not in st.session_state:
