@@ -1,6 +1,5 @@
 import streamlit as st
-import requests
-import time
+import random
 
 st.set_page_config(page_title="PETRUX AI", page_icon="🤖", layout="centered")
 
@@ -38,15 +37,48 @@ with st.sidebar:
     st.markdown("💡 Built by: **Peter Eniola Ayanniyi**")
     st.markdown("🎯 Mission: Africa's AI Future")
     st.markdown("---")
-    st.markdown("### ✨ Features")
-    st.markdown("✅ Smart Conversations")
-    st.markdown("✅ Fast Responses")
-    st.markdown("✅ 100% Free")
+    st.markdown("### 📊 Status")
+    st.markdown("✅ **AI Engine:** PETRU v1.0")
+    st.markdown("✅ **Status:** Online")
+    st.markdown("✅ **Free to use**")
 
-# --- Using a simpler, more reliable model ---
-API_URL = "https://api-inference.huggingface.co/models/gpt2"
-headers = {"Authorization": "Bearer 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"}
+# --- PETRU's Responses (Self-Contained) ---
+def get_petru_response(prompt):
+    prompt_lower = prompt.lower()
+    
+    # --- PRE-PROGRAMMED RESPONSES ---
+    responses = {
+        "hello": "Hello! I'm PETRU, your AI assistant on PETRUX OS. How can I help you today?",
+        "hi": "Hi there! I'm PETRU on PETRUX OS. What can I do for you?",
+        "who built you": "I was built by Peter Eniola Ayanniyi, a young Nigerian innovator! He created PETRUX AI to bring intelligent assistance to Africa and the world.",
+        "what can you do": "I can answer questions, help with creative tasks, and assist with problem-solving. Ask me anything!",
+        "capital of nigeria": "The capital of Nigeria is Abuja. It became the capital in 1991, replacing Lagos.",
+        "nigeria": "Nigeria is a beautiful country in West Africa. It's home to over 200 million people, with over 250 ethnic groups!",
+        "age": "I don't have an age, but I was created by Peter Eniola Ayanniyi in 2026.",
+        "joke": "Why do programmers prefer dark mode? Because light attracts bugs! 😄",
+        "how are you": "I'm doing great, thanks for asking! I'm always happy to chat with you.",
+        "your name": "I'm PETRU, your AI assistant on PETRUX OS!",
+        "thank you": "You're welcome! I'm always here to help.",
+        "africa": "Africa is a amazing continent! I'm proud to be built in Africa by Peter Eniola Ayanniyi.",
+        "build": "I was built by Peter Eniola Ayanniyi using Python and AI technology.",
+        "2+2": "2 + 2 equals 4. That's basic math!",
+        "what is": "I can help with many questions! What would you like to know?",
+    }
+    
+    # Check for matching keywords
+    for key in responses:
+        if key in prompt_lower:
+            return responses[key]
+    
+    # --- FALLBACK: Generate a response using patterns ---
+    if "?" in prompt:
+        return "That's a great question! I'm still learning, but I'd love to help you find the answer."
+    elif "help" in prompt_lower:
+        return "I'm here to help! Ask me about anything, and I'll do my best to assist you."
+    else:
+        return f"Thanks for asking about '{prompt}'. I'm PETRU on PETRUX OS, and I'm here to learn and grow with you!"
 
+# --- Chat Interface ---
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "assistant", "content": "Hello! I'm PETRU on PETRUX OS. How can I help you today?"}
@@ -63,40 +95,9 @@ if prompt := st.chat_input("Ask PETRU anything..."):
     
     with st.chat_message("assistant"):
         with st.spinner("PETRU is thinking..."):
-            try:
-                # Simpler prompt format
-                full_prompt = f"You are PETRU, a helpful AI assistant. User: {prompt}\nPETRU:"
-                
-                payload = {
-                    "inputs": full_prompt,
-                    "parameters": {
-                        "max_new_tokens": 100,
-                        "temperature": 0.7,
-                        "do_sample": True,
-                        "return_full_text": False
-                    }
-                }
-                
-                response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
-                
-                if response.status_code == 200:
-                    result = response.json()
-                    petru_reply = result[0]['generated_text'].strip()
-                    
-                    if not petru_reply:
-                        petru_reply = "I'm PETRU on PETRUX OS. How can I help?"
-                    
-                    st.markdown(petru_reply)
-                    st.session_state.messages.append({"role": "assistant", "content": petru_reply})
-                else:
-                    st.error(f"API Error: {response.status_code}")
-                    
-            except requests.exceptions.Timeout:
-                st.error("⏰ PETRU is taking too long. Please try again.")
-            except requests.exceptions.ConnectionError:
-                st.error("🌐 Connection error. Please refresh and try again.")
-            except Exception as e:
-                st.error(f"Error: {e}")
+            petru_reply = get_petru_response(prompt)
+            st.markdown(petru_reply)
+            st.session_state.messages.append({"role": "assistant", "content": petru_reply})
 
 st.markdown("---")
 st.markdown('<div class="footer">© 2026 PETRUX AI • Built by Peter Eniola Ayanniyi</div>', unsafe_allow_html=True)
