@@ -25,11 +25,6 @@ st.markdown("""
         padding: 2rem 0;
         color: #888;
     }
-    .stChatMessage {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 10px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -47,18 +42,15 @@ with st.sidebar:
     st.markdown("### ✨ Features")
     st.markdown("✅ Answers ANY question")
     st.markdown("✅ Smart & Fast")
-    st.markdown("✅ Powered by Hugging Face")
     st.markdown("✅ 100% Free")
     st.markdown("---")
-    st.markdown("### 💡 Ask me anything!")
-    st.markdown("I can help with:")
-    st.markdown("• General knowledge")
-    st.markdown("• Math & Science")
-    st.markdown("• History & Geography")
-    st.markdown("• Creative writing")
-    st.markdown("• And much more!")
+    st.markdown("### 💡 Try asking:")
+    st.markdown("• What is the capital of France?")
+    st.markdown("• Tell me a story about Nigeria")
+    st.markdown("• What is 125 x 37?")
+    st.markdown("• Explain AI simply")
 
-# --- YOUR HUGGING FACE TOKEN (ALREADY INSERTED) ---
+# --- USING YOUR TOKEN ---
 API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium"
 headers = {"Authorization": "Bearer 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"}
 
@@ -79,7 +71,6 @@ if prompt := st.chat_input("Ask PETRU anything..."):
     with st.chat_message("assistant"):
         with st.spinner("PETRU is thinking..."):
             try:
-                # Build conversation history
                 conversation = "\n".join([
                     f"{msg['role']}: {msg['content']}" 
                     for msg in st.session_state.messages[-6:]
@@ -109,7 +100,7 @@ if prompt := st.chat_input("Ask PETRU anything..."):
                     st.session_state.messages.append({"role": "assistant", "content": petru_reply})
                 else:
                     st.error(f"API Error: {response.status_code}")
-                    st.info("💡 Trying to connect... Please wait a moment.")
+                    st.info("💡 Please wait a moment and try again.")
                     
             except requests.exceptions.Timeout:
                 st.error("⏰ PETRU is thinking hard! Please try again.")
@@ -117,7 +108,6 @@ if prompt := st.chat_input("Ask PETRU anything..."):
                 st.error("🌐 Connection error. Please refresh and try again.")
             except Exception as e:
                 st.error(f"Error: {e}")
-                st.info("💡 If this keeps happening, try restarting the app.")
 
 st.markdown("---")
 st.markdown('<div class="footer">© 2026 PETRUX AI • Built by Peter Eniola Ayanniyi</div>', unsafe_allow_html=True)
